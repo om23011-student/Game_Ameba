@@ -1,0 +1,184 @@
+/* =========================================
+   1. Variables y Reset
+   ========================================= */
+:root {
+    --color-bg-cafe: #1a1a1a;
+    --color-pizarra: #2c2c2c;
+    --color-tiza: #f4f4f4;
+    --color-tiza-off: #a0a0a0;
+    --color-madera-borde: #424141;
+    --color-madera-detalle: #8d6e63;
+    
+    --font-heading: 'DM Serif Display', serif;
+    --font-body: 'Montserrat', sans-serif;
+    
+    --shadow-chalkboard: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--color-bg-cafe);
+    color: var(--color-tiza);
+    font-family: var(--font-body);
+    font-weight: 300;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* =========================================
+   2. Layout General
+   ========================================= */
+.cafe-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.cafe-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+
+.brand {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    color: var(--color-madera-detalle);
+    text-transform: uppercase;
+}
+
+.area-title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    margin-top: 0.5rem;
+    color: var(--color-tiza);
+}
+
+.divider {
+    height: 2px;
+    width: 50px;
+    background-color: var(--color-madera-detalle);
+    margin: 1rem auto;
+}
+
+/* =========================================
+   3. Marco de Pizarra (Inputs y Canvas)
+   ========================================= */
+.chalkboard-frame {
+    background-color: var(--color-pizarra);
+    border: 10px solid var(--color-madera-borde);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-chalkboard);
+}
+
+.settings-bar {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed var(--color-tiza-off);
+}
+
+/* Estilo de Inputs tipo Tiza */
+.input-group label {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+    display: block;
+    color: var(--color-madera-detalle);
+    margin-bottom: 5px;
+}
+
+input[type="number"] {
+    background: transparent;
+    border: 1px solid var(--color-tiza-off);
+    color: var(--color-tiza);
+    padding: 8px;
+    border-radius: 4px;
+    width: 80px;
+    font-family: var(--font-body);
+    outline: none;
+}
+
+input[type="number"]:focus {
+    border-color: var(--color-tiza);
+}
+
+/* Botón Estilo Latto */
+.btn-latto {
+    background-color: var(--color-madera-detalle);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+    align-self: flex-end;
+}
+
+.btn-latto:hover {
+    background-color: #6d544b;
+}
+
+/* =========================================
+   4. Canvas
+   ========================================= */
+.canvas-holder {
+    display: flex;
+    justify-content: center;
+    overflow: auto;
+    max-width: 100%;
+    background: #222; /* Un tono más oscuro para el área de dibujo */
+    border-radius: 8px;
+}
+
+#glCanvas {
+    max-width: 100%;
+    height: auto;
+    /* Quitamos el fondo blanco por defecto para que se vea integrado */
+    background-color: #000; 
+}
+
+/* =========================================
+   5. Footer y Pistas
+   ========================================= */
+.hint-box {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.hint {
+    font-weight: 500;
+    color: var(--color-tiza);
+}
+
+.details {
+    font-size: 0.8rem;
+    color: var(--color-tiza-off);
+    font-style: italic;
+}
+
+.cafe-footer {
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: var(--color-tiza-off);
+    text-align: center;
+}

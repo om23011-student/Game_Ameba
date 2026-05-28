@@ -1,0 +1,38 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "lanzarBrowserSync",
+            "type": "shell",
+            "command": "npx browser-sync start --server \"${workspaceFolder}/src\" --files \"${workspaceFolder}/src/**/*\" --no-open",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "isBackground": true,
+            // --- ESTE ES EL CAMBIO ---
+            "problemMatcher": {
+                "pattern": { "regexp": "." },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".",
+                    "endsPattern": "."
+                }
+            }
+            // -------------------------
+        },
+        {
+            "label": "detenerBrowserSync",
+            "type": "shell",
+            "command": "echo ${input:terminate}",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "terminate",
+            "type": "command",
+            "command": "workbench.action.tasks.terminate",
+            "args": "terminateAll"
+        }
+    ]
+}

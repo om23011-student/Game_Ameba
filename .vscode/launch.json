@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Lanzar BrowserSync",
+            "url": "http://localhost:3000/boundary/main.html",
+            "webRoot": "${workspaceFolder}/src",
+            "runtimeExecutable": "/usr/bin/google-chrome",
+            "preLaunchTask": "lanzarBrowserSync",
+            "postDebugTask": "detenerBrowserSync"
+        }
+    ]
+}

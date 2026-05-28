@@ -1,0 +1,217 @@
+/* --- Paleta de Colores Japonesa --- */
+:root {
+  --bg-color: #faf8f5;      /* Washi */
+  --ink-color: #2c2c2c;     /* Sumi */
+  --accent-color: #8c2f39;  /* Enji */
+  --border-color: #d1ccc0;  /* Gris cálido */
+  --wood-color: #e8e2d6;    /* Madera clara */
+  --text-soft: #666;
+}
+
+/* --- Base --- */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: var(--ink-color);
+}
+
+/* --- Layout Principal --- */
+.main-layout {
+  display: flex;
+  gap: 40px;
+  padding: 20px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+  align-items: flex-start; /* Alinea ambas columnas al inicio superior */
+}
+
+.seccion-izquierda {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* CORRECCIÓN: Evita que el contenedor de imagen se estire artificialmente */
+}
+
+.panel-derecho {
+  width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* --- Top Bar / Header --- */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: #fff;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 10px;
+}
+
+.logo {
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* --- Herramientas e Inputs --- */
+.toolbar-canvas {
+  margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.input-group {
+  margin-top: 15px;
+}
+
+input[type="text"] {
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px;
+  outline: none;
+  width: 100%;
+  margin-bottom: 10px;
+  background: transparent;
+  transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+  border-bottom-color: var(--accent-color);
+}
+
+.input-hidden {
+  display: none;
+}
+
+/* --- Botones --- */
+.btn-jap {
+  background: none;
+  border: 1px solid var(--ink-color);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: all 0.3s ease;
+  color: var(--ink-color);
+}
+
+.btn-jap:hover {
+  background-color: var(--ink-color);
+  color: #fff;
+}
+
+.btn-jap.primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #fff;
+}
+
+.btn-icon {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+/* --- Contenedor de Canvas Dinámico (Izquierda) --- */
+/* --- Ajuste en el Contenedor de Canvas --- */
+.canvas-container {
+  position: relative;
+  display: inline-flex;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  box-shadow: 6px 6px 0px var(--wood-color);
+  margin-top: 10px;
+  overflow: visible;
+  /* NUEVO: Limites máximos para el contenedor */
+  max-width: 800px;
+  max-height: 800px;
+}
+
+#canvasImagen, #canvasDibujo {
+  /* Aseguramos que los canvas respeten el tamaño del contenedor */
+  max-width: 800px;
+  max-height: 800px;
+  object-fit: contain;
+}
+
+/* Canvas de Dibujo: Se superpone al de imagen */
+#canvasDibujo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+/* --- Panel Derecho: Cards y WebGL --- */
+.card-jap {
+  background: #fff;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+}
+
+.card-jap h3 {
+  margin-top: 0;
+  font-weight: 400;
+  border-left: 4px solid var(--accent-color);
+  padding-left: 15px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+/* Canvas WebGL (Dataset) - Forzado a flujo estático */
+#glCanvas {
+  position: static !important;
+  display: block;
+  margin: 0 auto;
+  border: 1px solid var(--ink-color);
+  background-color: #fff;
+}
+
+.canvas-wrapper-webgl {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+/* --- Estado del Sistema --- */
+.status-box {
+  margin-top: 25px;
+  padding: 12px;
+  background: var(--wood-color);
+  border-left: 3px solid var(--ink-color);
+  font-size: 13px;
+  border-radius: 2px;
+}
+
+.dot {
+  height: 8px;
+  width: 8px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}

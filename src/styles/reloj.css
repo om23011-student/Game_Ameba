@@ -1,0 +1,158 @@
+/* =========================================
+   1. Variables y Reset Global
+   ========================================= */
+:root {
+    /* Paleta Inspirada en Café y Pizarra */
+    --color-bg-cafe: #1a1a1a;        /* Fondo general oscuro, casi negro */
+    --color-pizarra: #2c2c2c;       /* Fondo del marco del reloj (pizarra) */
+    --color-tiza: #f4f4f4;          /* Texto principal (crema suave) */
+    --color-tiza-off: #a0a0a0;      /* Texto secundario (gris tiza) */
+    --color-madera-borde: #424141;  /* Marrón madera oscura */
+    --color-madera-detalle: #8d6e63; /* Marrón madera clara */
+    
+    /* Fuentes */
+    --font-heading: 'DM Serif Display', serif;
+    --font-body: 'Montserrat', sans-serif;
+    
+    /* Sombras y Efectos */
+    --shadow-chalkboard: 0 10px 30px rgba(0,0,0,0.5);
+    --shadow-inset: inset 0 2px 10px rgba(0,0,0,0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-shadow: border-box;
+}
+
+body {
+    background-color: var(--color-bg-cafe);
+    color: var(--color-tiza);
+    font-family: var(--font-body);
+    font-weight: 300;
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* =========================================
+   2. Contenedor Principal (Layout)
+   ========================================= */
+.cafe-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 900px; /* Ancho cómodo para el diseño */
+    padding: 2rem;
+}
+
+/* =========================================
+   3. Cabecera y Pie (Decorativos)
+   ========================================= */
+.cafe-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.cafe-header .brand {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: var(--color-tiza);
+    text-transform: uppercase;
+}
+
+.cafe-header .divider {
+    height: 2px;
+    width: 60px;
+    background-color: var(--color-madera-detalle);
+    margin: 0.5rem auto 0;
+}
+
+.cafe-footer {
+    margin-top: 3rem;
+    font-size: 0.8rem;
+    color: var(--color-tiza-off);
+    text-align: center;
+}
+
+/* =========================================
+   4. El Contenedor del Reloj (Pizarra)
+   ========================================= */
+.clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.chalkboard-frame {
+    background-color: var(--color-pizarra);
+    border: 12px solid var(--color-madera-borde); /* Marco de madera */
+    border-radius: 50px; /* Bordes ligeramente suavizados */
+    padding: 2.5rem;
+    box-shadow: var(--shadow-chalkboard);
+    position: relative;
+    text-align: center;
+    
+    
+}
+
+.clock-title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--color-tiza);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+}
+
+/* =========================================
+   5. El Canvas y la Imagen Integrada
+   ========================================= */
+#canvas {
+    display: block;
+    background-color: transparent !important;
+    border-radius: 50%;
+    
+    background-image: url('../media/reloj.png'); 
+    background-size: 115%; 
+    
+    /* Ajuste de posición:
+       50% (X) = Centrado horizontalmente.
+       52% (Y) = Un poco más abajo del centro. 
+       Aumenta este 52% (ej. 53%, 55%) hasta que encaje perfecto.
+    */
+    background-position: 50% 40%; 
+    
+    background-repeat: no-repeat;
+
+    width: 500px;
+    height: 500px;  
+    
+    position: relative;
+    z-index: 1; 
+}
+
+/* =========================================
+   6. Caja de Pistas/Detalles
+   ========================================= */
+.hint-box {
+    margin-top: 1.5rem;
+    border-top: 1px dashed var(--color-tiza-off); /* Línea de tiza discontinua */
+    padding-top: 1rem;
+}
+
+.hint-box .hint {
+    font-weight: 500;
+    color: var(--color-tiza);
+    font-size: 1rem;
+}
+
+.hint-box .details {
+    font-size: 0.85rem;
+    color: var(--color-tiza-off);
+    font-style: italic;
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba WebGL DDA</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2c3e50; /* Un color de fondo oscuro para la página */
+        }
+        canvas {
+            background-color: #000000; /* Fondo negro para el canvas, resalta el color de los puntos */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5); /* Sombra para que se vea bien */
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="miCanvas" width="500" height="500"></canvas>
+
+    <script type="module" src="../js/core/game_ameba.js"></script>
+
+</body>
+</html>
