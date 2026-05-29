@@ -4,7 +4,7 @@ export default class Arco {
     calcularArco(cx, cy, r, inicio, fin) {
         const puntos = [];
 
-        const step = 0.01; // resolución
+        const step = 0.04; // resolución
 
         for (let ang = inicio; ang <= fin; ang += step) {
             const x = cx + r * Math.cos(ang);

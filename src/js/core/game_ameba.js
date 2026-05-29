@@ -18,7 +18,7 @@ const renderer = new WebGLRenderer(gl);
 // Configuramos el color de los puntos (R, G, B, A). Vamos a pintarlos de rojo. 
 renderer.setColor(1.0, 0.0, 0.0, 1.0);  
 
-// 3. Calculamos los puntos de la línea usando DDA 
+// 3. Calculamos los puntos de la línea usando las clases de algoritmos.
 const generadorLineas = new LineaDDA(); 
 const generadorLineasBresenham = new LineaBresenham(); 
 const generadorArcos = new DibujarArcos(); 
@@ -41,3 +41,38 @@ renderer.dibujar(puntosDeLinea, false);
 renderer.dibujar(puntosDeLineaBresenham, false); 
 renderer.dibujar(puntosDeArco, false); 
 renderer.dibujar(puntosDeElipse, false); 
+
+
+import WinDetector from './WinDetector.js';
+
+const juego = new WinDetector();
+juego.iniciarJuego(5,5);
+
+juego.colocarFicha(0, 0, true);
+juego.colocarFicha(0, 1, false);
+
+
+juego.mostrarTablero();
+const resultado = juego.verificarGanador();
+
+console.log("\nRESULTADO:\n");
+
+if (resultado.estado === "ganador") {
+
+    console.log(
+        resultado.ganador === true
+            ? "Ganó TRUE"
+            : "Ganó FALSE"
+    );
+
+}
+else if (resultado.estado === "continua") {
+
+    console.log("Continúa el juego");
+
+}
+else if (resultado.estado === "empate") {
+
+    console.log("Empate");
+
+}
