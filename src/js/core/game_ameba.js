@@ -4,44 +4,51 @@ import LineaBresenham from '../complements/algoritmo_bresenham.js';
 import DibujarArcos from '../complements/algoritmo_arcos.js'; 
 import AlgoritmoElipse from '../complements/algoritmo_elipse.js';
 
-// 1. Obtenemos el canvas y el contexto de WebGL 
-const canvas = document.getElementById('miCanvas'); 
-const gl = canvas.getContext('webgl'); 
+// Nos quedamos esperando a que el HTML nos pegue el grito de "startGame" para arrancar
+window.addEventListener('startGame', (e) => {
+    const config = e.detail;
+    console.log("¡Dándole fuego al motor WebGL con esta config!:", config);
+    iniciarJuegoWebGL(config);
+});
 
-if (!gl) { 
-    console.error("Tu navegador no soporta WebGL bro :("); 
-} 
+function iniciarJuegoWebGL(config) {
+    // 1. Agarramos el canvas del DOM y le sacamos los poderes de WebGL
+    const canvas = document.getElementById('miCanvas');
+    const gl = canvas.getContext('webgl');
 
-// 2. Instanciamos el renderizador optimizado 
-const renderer = new WebGLRenderer(gl); 
+    // Por si alguien entra desde una tostadora sin soporte gráfico
+    if (!gl) {
+        console.error("Uy, tu navegador no aguanta WebGL bro :(");
+        return;
+    }
 
-// Configuramos el color de los puntos (R, G, B, A). Vamos a pintarlos de rojo. 
-renderer.setColor(1.0, 0.0, 0.0, 1.0);  
+    // 2. Instanciamos a nuestro trabajador estrella (el renderizador)
+    const renderer = new WebGLRenderer(gl);
 
-// 3. Calculamos los puntos de la línea usando las clases de algoritmos.
-const generadorLineas = new LineaDDA(); 
-const generadorLineasBresenham = new LineaBresenham(); 
-const generadorArcos = new DibujarArcos(); 
-const generadorElipses = new AlgoritmoElipse();
+    // Le ponemos un colorcito guapo rojo para las líneas (R, G, B, A).
+    renderer.setColor(1.0, 0.0, 0.0, 1.0);
 
-// OJO: En WebGL puro, el centro del canvas es (0,0) y los bordes son 1.0 y -1.0 
-// Así que vamos a hacer una línea en diagonal que cruce la pantalla. 
-const puntosDeLinea = generadorLineas.calcularDDA(-0.8, -0.8, 0.8, 0.8); 
-const puntosDeLineaBresenham = generadorLineasBresenham.calcularBresenham(-0.8, 0.8, 0.8, -0.8); 
-const puntosDeArco = generadorArcos.calcularArco(0, 0, 0.5,0, Math.PI*2); 
-const puntosDeElipse = generadorElipses.calcularElipse(0, 0, 0.8, 0.4);
+    // 3. Traemos a la banda de los algoritmos (Temporal nomás para ver que anden finos)
+    const generadorLineas = new LineaDDA();
+    const generadorLineasBresenham = new LineaBresenham();
+    const generadorArcos = new DibujarArcos();
+    const generadorElipses = new AlgoritmoElipse();
 
-// 4. Limpiamos la pantalla y dibujamos 
-renderer.limpiar();  
+    // Unos garabatos temporales para asegurar que el WebGL esté al cien.
+    // Ya lueguito dibujamos el Grid chido de NxN aquí.
+    const puntosDeLinea = generadorLineas.calcularDDA(-0.8, -0.8, 0.8, 0.8);
+    const puntosDeLineaBresenham = generadorLineasBresenham.calcularBresenham(-0.8, 0.8, 0.8, -0.8);
+    const puntosDeArco = generadorArcos.calcularArco(0, 0, 0.5, 0, Math.PI*2);
+    const puntosDeElipse = generadorElipses.calcularElipse(0, 0, 0.8, 0.4);
 
-// Le pasamos 'false' en el segundo parámetro porque la línea es estática 
-// (no se va a estar moviendo o recalculando en cada frame de una animación). 
-// Esto le dice a WebGL que la guarde de forma más eficiente (STATIC_DRAW). 
-renderer.dibujar(puntosDeLinea, false); 
-renderer.dibujar(puntosDeLineaBresenham, false); 
-renderer.dibujar(puntosDeArco, false); 
-renderer.dibujar(puntosDeElipse, false); 
+    // 4. Barremos la pantalla para que quede limpia y aventamos los dibujos al lienzo
+    renderer.limpiar();
 
+    renderer.dibujar(puntosDeLinea, false);
+    renderer.dibujar(puntosDeLineaBresenham, false);
+    renderer.dibujar(puntosDeArco, false);
+    renderer.dibujar(puntosDeElipse, false);
+}
 
 import WinDetector from './WinDetector.js';
 
