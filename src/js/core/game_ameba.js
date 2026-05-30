@@ -25,29 +25,45 @@ function iniciarJuegoWebGL(config) {
     // 2. Instanciamos a nuestro trabajador estrella (el renderizador)
     const renderer = new WebGLRenderer(gl);
 
-    // Le ponemos un colorcito guapo rojo para las líneas (R, G, B, A).
-    renderer.setColor(1.0, 0.0, 0.0, 1.0);
 
-    // 3. Traemos a la banda de los algoritmos (Temporal nomás para ver que anden finos)
+    renderer.setColor(0.8, 0.8, 0.8, 1.0);
+
+    // 3. Traemos a la banda de los algoritmos
     const generadorLineas = new LineaDDA();
     const generadorLineasBresenham = new LineaBresenham();
     const generadorArcos = new DibujarArcos();
     const generadorElipses = new AlgoritmoElipse();
 
-    // Unos garabatos temporales para asegurar que el WebGL esté al cien.
-    // Ya lueguito dibujamos el Grid chido de NxN aquí.
-    const puntosDeLinea = generadorLineas.calcularDDA(-0.8, -0.8, 0.8, 0.8);
-    const puntosDeLineaBresenham = generadorLineasBresenham.calcularBresenham(-0.8, 0.8, 0.8, -0.8);
-    const puntosDeArco = generadorArcos.calcularArco(0, 0, 0.5, 0, Math.PI*2);
-    const puntosDeElipse = generadorElipses.calcularElipse(0, 0, 0.8, 0.4);
+    // Implementamos la cuadrícula (Grid) usando el algoritmo DDA
+    const puntosDelGrid = [];
+    const cols = config.cols || 5;
+    const rows = config.rows || 5;
+
+    // Vamos a dejar un pequeño margen (de -0.9 a 0.9)
+    const xMin = -0.9;
+    const xMax = 0.9;
+    const yMin = -0.9;
+    const yMax = 0.9;
+
+    // Lineas verticales
+    for(let i = 0; i <= cols; i++) {
+        const x = xMin + (i / cols) * (xMax - xMin);
+        const linea = generadorLineas.calcularDDA(x, yMin, x, yMax);
+        puntosDelGrid.push(...linea);
+    }
+
+    // Lineas horizontales
+    for(let i = 0; i <= rows; i++) {
+        const y = yMin + (i / rows) * (yMax - yMin);
+        const linea = generadorLineas.calcularDDA(xMin, y, xMax, y);
+        puntosDelGrid.push(...linea);
+    }
 
     // 4. Barremos la pantalla para que quede limpia y aventamos los dibujos al lienzo
     renderer.limpiar();
 
-    renderer.dibujar(puntosDeLinea, false);
-    renderer.dibujar(puntosDeLineaBresenham, false);
-    renderer.dibujar(puntosDeArco, false);
-    renderer.dibujar(puntosDeElipse, false);
+    // Dibujamos el grid oficial y quitamos los garabatos de prueba
+    renderer.dibujar(puntosDelGrid, false);
 }
 
 import WinDetector from './WinDetector.js';
