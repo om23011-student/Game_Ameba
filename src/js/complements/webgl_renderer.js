@@ -5,11 +5,11 @@ export default class WebGLRenderer {
     constructor(gl) {
         this.gl = gl;
         this.color = [1.0, 1.0, 1.0, 1.0]; // Color blanco por defecto
-        
+
         this.program = this._iniciarShaders();
         this.buffer = this.gl.createBuffer();
 
-        // 🚀 OPTIMIZACIÓN CLAVE: Buscamos las locaciones UNA SOLA VEZ en el constructor
+        // OPTIMIZACIN CLAVE: Buscamos las locaciones UNA SOLA VEZ en el constructor
         this.coordLocation = this.gl.getAttribLocation(this.program, "coordenadas");
         this.colorLocation = this.gl.getUniformLocation(this.program, "u_color");
     }
@@ -59,7 +59,7 @@ export default class WebGLRenderer {
      * @param {number[]} vertices Arreglo de coordenadas [x, y, z, ...]
      * @param {boolean} isDynamic true si los vértices cambian en cada frame, false si son estáticos
      */
-    dibujar(vertices, isDynamic = true) {
+    dibujar(vertices, isDynamic = true, mode = this.gl.POINTS) {
         if (!vertices || vertices.length === 0) return;
 
         this.gl.useProgram(this.program);
@@ -68,6 +68,7 @@ export default class WebGLRenderer {
         if (this.colorLocation !== null) {
             this.gl.uniform4f(this.colorLocation, ...this.color);
         }
+
 
         // 2. Preparamos el buffer
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
@@ -81,6 +82,6 @@ export default class WebGLRenderer {
         this.gl.enableVertexAttribArray(this.coordLocation);
 
         // 4. Dibujar
-        this.gl.drawArrays(this.gl.POINTS, 0, vertices.length / 3);
+        this.gl.drawArrays(mode, 0, vertices.length / 3);
     }
 }

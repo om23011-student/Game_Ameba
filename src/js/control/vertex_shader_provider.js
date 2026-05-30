@@ -7,7 +7,7 @@ class VertexShaderProvider {
         attribute vec3 coordenadas; // Debe declararse fuera del main
 
         void main(void) {
-            gl_PointSize = 4.0; 
+            gl_PointSize = 4.0;
             gl_Position = vec4(coordenadas, 1.0);
         }
         `;
