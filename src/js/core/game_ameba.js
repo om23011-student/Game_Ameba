@@ -161,7 +161,7 @@ function iniciarJuegoWebGL(config) {
         }
 
         // 4.2 Dibujamos la cuadrícula oficial
-        renderer.setColor(0.8, 0.8, 0.8, 1.0); // Retomamos gris claro para grid
+        renderer.setColor(0.8, 0.8, 0.8, 1.0); // Retomamos gris claro para grid (será mejor cambiarlo)
         renderer.dibujar(puntosDelGrid, false, gl.POINTS);
 
         // * Aquí luego dibujaremos las piezas X y O!
