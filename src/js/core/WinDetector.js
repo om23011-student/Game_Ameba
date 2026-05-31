@@ -126,6 +126,7 @@ export default class Ameba {
                         return {
                             estado: "ganador",
                             ganador: valor,
+                            fichaGanadora: valor ? "0" : "X", // <-- NUEVO: Retorna "0" o "X"
                             filaInicio: i,
                             columnaInicio: j,
                             direccion: [dx, dy]
@@ -150,7 +151,20 @@ export default class Ameba {
     }
 
     // ========================================
-    // MOSTRAR TABLERO
+    // REINICIAR TABLERO
+    // ========================================
+    reiniciarTablero() {
+        for (let i = 0; i < this.filas; i++) {
+            for (let j = 0; j < this.columnas; j++) {
+                this.tablero[i][j] = null;
+            }
+        }
+        console.log("¡El tablero ha sido reiniciado por completo!");
+    }
+
+
+    // ========================================
+    // MOSTRAR TABLERO ( solo para verificar en consola )
     // ========================================
 
     mostrarTablero() {

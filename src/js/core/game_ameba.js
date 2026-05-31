@@ -1,8 +1,9 @@
 import WebGLRenderer from '../complements/webgl_renderer.js'; 
-import LineaDDA from '../complements/algoritmo_dda.js'; 
+import GridBuilder from '../complements/grid_builder.js';
 import LineaBresenham from '../complements/algoritmo_bresenham.js'; 
 import DibujarArcos from '../complements/algoritmo_arcos.js'; 
 import AlgoritmoElipse from '../complements/algoritmo_elipse.js';
+import WinDetector from './WinDetector.js';
 
 // Nos quedamos esperando a que el HTML nos pegue el grito de "startGame" para arrancar
 window.addEventListener('startGame', (e) => {
@@ -28,44 +29,33 @@ function iniciarJuegoWebGL(config) {
 
     // 2. Instanciamos a nuestro trabajador estrella (el renderizador)
     const renderer = new WebGLRenderer(gl);
-
     renderer.setColor(0.8, 0.8, 0.8, 1.0);
 
-    // 3. Traemos a la banda de los algoritmos
-    const generadorLineas = new LineaDDA();
+    // 3. Traemos a la banda de los algoritmos (LineaDDA ya no está aquí)
     const generadorLineasBresenham = new LineaBresenham();
     const generadorArcos = new DibujarArcos();
     const generadorElipses = new AlgoritmoElipse();
 
-    // Implementamos la cuadrícula (Grid) usando el algoritmo DDA
-    const puntosDelGrid = [];
+    // =====================================================================
+    // 4. NUEVA IMPLEMENTACIÓN DEL GRID BUILDER
+    // =====================================================================
+    const gridBuilder = new GridBuilder(-0.9, 0.9, -0.9, 0.9);
+    
+    // Obtenemos los puntos para dibujar
+    const puntosDelGrid = gridBuilder.generarPuntos(config.rows, config.cols);
+    
+    // Obtenemos las dimensiones de las celdas
+    const { cellWidth, cellHeight } = gridBuilder.calcularDimensionesCelda(config.rows, config.cols);
 
-    // Vamos a dejar un pequeño margen (de -0.9 a 0.9)
-    const xMin = -0.9;
-    const xMax = 0.9;
-    const yMin = -0.9;
-    const yMax = 0.9;
-
-    // Lineas verticales
-    for(let i = 0; i <= config.cols; i++) {
-        const x = xMin + (i / config.cols) * (xMax - xMin);
-        const linea = generadorLineas.calcularDDA(x, yMin, x, yMax);
-        puntosDelGrid.push(...linea);
-    }
-
-    // Lineas horizontales
-    for(let i = 0; i <= config.rows; i++) {
-        const y = yMin + (i / config.rows) * (yMax - yMin);
-        const linea = generadorLineas.calcularDDA(xMin, y, xMax, y);
-        puntosDelGrid.push(...linea);
-    }
+    // Mantenemos las variables límite para que el mouse siga funcionando igual
+    const xMin = gridBuilder.xMin;
+    const xMax = gridBuilder.xMax;
+    const yMin = gridBuilder.yMin;
+    const yMax = gridBuilder.yMax;
+    // =====================================================================
 
     // Variables para el evento Hover
     let cellHoverInfo = { fila: -1, col: -1 };
-
-    // Calcular tamaño de celdas
-    const cellWidth = (xMax - xMin) / config.cols;
-    const cellHeight = (yMax - yMin) / config.rows;
 
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -104,29 +94,64 @@ function iniciarJuegoWebGL(config) {
 
     let turnoJugador = true; // true = Jugador 1 (O), false = Jugador 2 (X)
 
+    // 1. Destruimos los eventos de la partida anterior (si existen)
+    if (window.gameAborter) {
+        window.gameAborter.abort(); // ¡Mata los eventos viejos!
+    }
+    // Creamos un nuevo controlador para esta partida
+    window.gameAborter = new AbortController();
+    const signal = window.gameAborter.signal;
+
+
+    // 2. Le pasamos el 'signal' al evento del canvas
     canvas.addEventListener('click', (e) => {
         if(cellHoverInfo.fila !== -1 && cellHoverInfo.col !== -1) {
-            // Intentar colocar la ficha
+            
             const colocado = juego.colocarFicha(cellHoverInfo.fila, cellHoverInfo.col, turnoJugador);
 
             if (colocado) {
-                // Verificar si hay ganador inmediatamente despues de colocar
                 const resultado = juego.verificarGanador();
+                const figuraSeleccionada = document.getElementById('player-symbol').value;
+                
                 if (resultado.estado === "ganador") {
-                    const ganadorTxt = resultado.ganador ? "Jugador 1" : "Jugador 2";
-                    setTimeout(() => alert("¡Ganador: " + ganadorTxt + "!"), 50);
+                    
+                    if (resultado.fichaGanadora === figuraSeleccionada) {
+                        setTimeout(() => {
+                            alert("¡Ganador: Jugador 1!");
+                            juego.reiniciarTablero(); 
+                        }, 50);
+                    } else {
+                        setTimeout(() => {
+                            alert("¡Ganador: Jugador 2!");
+                            juego.reiniciarTablero(); 
+                        }, 50);
+                    }
                 } else if (resultado.estado === "empate") {
-                    setTimeout(() => alert("¡Empate!"), 50);
+                    setTimeout(() => {
+                        alert("¡Empate!");
+                        juego.reiniciarTablero(); 
+                    }, 50);
                 }
 
-                // Cambiar de turno si el juego continua
                 if (resultado.estado !== "ganador") {
                     turnoJugador = !turnoJugador;
                 }
             }
         }
-    });
+    }, { signal: signal }); 
 
+
+    // 3. También le pasamos el 'signal' a tu botón de reinicio
+    const btnRestart = document.getElementById('btn-restart');
+    btnRestart.addEventListener('click', () => {
+        
+        juego.reiniciarTablero(); 
+        turnoJugador = true; 
+
+        cellHoverInfo.col = -1;
+        cellHoverInfo.fila = -1;
+    }, { signal: signal }); 
+    
     // 4. Ciclo de Animación / Redibujado
     function renderLoop() {
         renderer.limpiar();
@@ -164,7 +189,54 @@ function iniciarJuegoWebGL(config) {
         renderer.setColor(0.8, 0.8, 0.8, 1.0); // Retomamos gris claro para grid (será mejor cambiarlo)
         renderer.dibujar(puntosDelGrid, false, gl.POINTS);
 
-        // * Aquí luego dibujaremos las piezas X y O!
+        // =====================================================================
+        // 4.3 DIBUJAMOS LAS PIEZAS X y O EN EL TABLERO
+        // =====================================================================
+        
+        // Iteramos por todas las filas y columnas de nuestro tablero lógico
+        for (let r = 0; r < config.rows; r++) {
+            for (let c = 0; c < config.cols; c++) {
+                
+                const ficha = juego.tablero[r][c];
+
+                // Si la celda no está vacía, calculamos su centro y dibujamos
+                if (ficha !== null) {
+                    
+                    // 1. Calculamos el CENTRO EXACTO de la celda (cx, cy)
+                    const cx = xMin + (c * cellWidth) + (cellWidth / 2);
+                    const cy = yMax - (r * cellHeight) - (cellHeight / 2);
+                    
+                    // 2. Definimos un tamaño para la figura
+                    const sizeX = cellWidth * 0.35; 
+                    const sizeY = cellHeight * 0.35;
+
+                    let puntosFigura = []; 
+
+                    // 3. Verificamos qué figura es
+                    if (ficha === true) {
+                        // === ES EL TURNO DEL JUGADOR 1 (CERO) ===
+                        renderer.setColor(0.0, 1.0, 0.0, 1.0); // Verde
+                        
+                        const dibujarElipse = generadorElipses.calcularElipse(cx, cy, sizeX, sizeY, 50);
+                        renderer.dibujar(dibujarElipse, false);
+
+                    } else if (ficha === false) {
+                        // === ES EL TURNO DEL JUGADOR 2 (EQUIS) ===
+                        renderer.setColor(0.0, 0.0, 1.0, 1.0); // Azul
+                        
+                        const linea1 = generadorLineasBresenham.calcularBresenham(cx - sizeX, cy + sizeY, cx + sizeX, cy - sizeY);
+                        const linea2 = generadorLineasBresenham.calcularBresenham(cx - sizeX, cy - sizeY, cx + sizeX, cy + sizeY);
+                        puntosFigura = [...linea1, ...linea2];
+                        renderer.dibujar(puntosFigura, false);
+                    }
+
+                    // 4. Mandamos a dibujar la figura que hayamos cargado
+                    if (puntosFigura.length > 0) {
+                        renderer.dibujar(puntosFigura, false, gl.POINTS);
+                    }
+                }
+            }
+        }
 
         requestAnimationFrame(renderLoop);
     }
@@ -172,5 +244,3 @@ function iniciarJuegoWebGL(config) {
     // Inicia el render loop
     renderLoop();
 }
-
-import WinDetector from './WinDetector.js';
