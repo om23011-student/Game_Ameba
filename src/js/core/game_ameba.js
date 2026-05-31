@@ -4,6 +4,7 @@ import LineaBresenham from '../complements/algoritmo_bresenham.js';
 import DibujarArcos from '../complements/algoritmo_arcos.js'; 
 import AlgoritmoElipse from '../complements/algoritmo_elipse.js';
 import WinDetector from './WinDetector.js';
+import Motor from './Motor.js';
 
 // Nos quedamos esperando a que el HTML nos pegue el grito de "startGame" para arrancar
 window.addEventListener('startGame', (e) => {
@@ -26,6 +27,7 @@ function iniciarJuegoWebGL(config) {
     // Instanciamos el modelo lógico de nuestro juego!
     const juego = new WinDetector();
     juego.iniciarJuego(config.rows || 5, config.cols || 5);
+    const motor = new Motor();
 
     // 2. Instanciamos a nuestro trabajador estrella (el renderizador)
     const renderer = new WebGLRenderer(gl);
@@ -94,6 +96,85 @@ function iniciarJuegoWebGL(config) {
 
     let turnoJugador = true; // true = Jugador 1 (O), false = Jugador 2 (X)
 
+    // Agregamos una función auxiliar para mostrar mensajes (para no bloquear en modo DEMO)
+    const mostrarMensaje = (msg) => {
+        // Quitamos la restricción silenciosa: ahora SÍ alertará, sin importar el modo
+        // Para que de tiempo al renderizado antes del freeze, lo metemos en un minúsculo delay en su origen.
+        alert(msg);
+    };
+
+    // Agregamos una función auxiliar para verificar ganador y cambiar turno
+    const checkWinStateAndToggle = () => {
+        const resultado = juego.verificarGanador();
+        const figuraSeleccionada = document.getElementById('player-symbol') ? document.getElementById('player-symbol').value : null;
+
+        if (resultado.estado === "ganador") {
+            if (figuraSeleccionada && resultado.fichaGanadora === figuraSeleccionada) {
+                setTimeout(() => {
+                    mostrarMensaje("¡Ganador: Jugador 1!");
+
+                    if (config.mode !== 'eve') {
+                        juego.reiniciarTablero();
+                        turnoJugador = true;
+                    }
+                }, 50);
+            } else {
+                setTimeout(() => {
+                    mostrarMensaje(`¡Ganador: Jugador 2${config.mode !== 'pvp' ? ' (Motor)' : ''}!`);
+
+                    if (config.mode !== 'eve') {
+                        juego.reiniciarTablero();
+                        turnoJugador = true;
+                    }
+                }, 50);
+            }
+        } else if (resultado.estado === "empate") {
+            setTimeout(() => {
+                mostrarMensaje("¡Empate!");
+
+                if (config.mode !== 'eve') {
+                    juego.reiniciarTablero();
+                    turnoJugador = true;
+                }
+            }, 50);
+        } else {
+            turnoJugador = !turnoJugador;
+        }
+        return resultado;
+    };
+
+    // Función para que la IA (Motor) haga su jugada automáticamente
+    const jugarTurnoIA = () => {
+        // C) Invocamos nuestra función para obtener el rango de tiempo (humanizado o de exhibición)
+        const tiempoDeEspera = motor.obtenerTiempoPensamiento(config.mode);
+
+        setTimeout(() => {
+            // Evaluamos si el juego fue abortado por un reinicio manual
+            if (signal.aborted) return;
+
+            const movimientoIA = motor.obtenerMejorMovimiento(juego.tablero);
+            if (movimientoIA) {
+                const colocado = juego.colocarFicha(movimientoIA.fila, movimientoIA.columna, turnoJugador);
+
+                if (colocado) {
+                    const resultado = checkWinStateAndToggle();
+
+                    // Si estamos en demo (eve) y el juego sigue, mandamos el siguiente turno de IA
+                    if (resultado.estado !== "ganador" && resultado.estado !== "empate" && config.mode === 'eve') {
+                        jugarTurnoIA();
+                    }
+                }
+            }
+        }, tiempoDeEspera); // <- Le pasamos el tiempo generado de forma humana
+    };
+
+    // Función para arrancar el choque IA vs IA
+    const iniciarCicloDemo = () => {
+        if (config.mode === 'eve' && !signal.aborted) {
+            jugarTurnoIA();
+        }
+    };
+
     // 1. Destruimos los eventos de la partida anterior (si existen)
     if (window.gameAborter) {
         window.gameAborter.abort(); // ¡Mata los eventos viejos!
@@ -102,39 +183,37 @@ function iniciarJuegoWebGL(config) {
     window.gameAborter = new AbortController();
     const signal = window.gameAborter.signal;
 
+    // Si empezó el modo EVE (Demo), disparamos la primera jugada directamente!
+    if (config.mode === 'eve') {
+        setTimeout(iniciarCicloDemo, 500); // Un pequeño retardo inicial para la primera ficha
+    }
 
     // 2. Le pasamos el 'signal' al evento del canvas
     canvas.addEventListener('click', (e) => {
+
+        // B) VERIFICACIONES CONDICIONALES PARA SEPARAR LA LÓGICA DE MODOS
+
+        // MODO Máquina vs Máquina (eve): Ignorar totalmente los clicks del usuario
+        if (config.mode === 'eve') {
+            return;
+        }
+
+        // MODO 1vsMáquina (pve): Solo se permite jugar si el valor es true (turno del humano), ignorarlo si es falso
+        if (config.mode === 'pve' && turnoJugador === false) {
+            return;
+        }
+
+        // MODO 1vs1 (pvp) o 1vsMáquina (turno válido del humano): Procederemos a realizar la jugada
         if(cellHoverInfo.fila !== -1 && cellHoverInfo.col !== -1) {
-            
+
             const colocado = juego.colocarFicha(cellHoverInfo.fila, cellHoverInfo.col, turnoJugador);
 
             if (colocado) {
-                const resultado = juego.verificarGanador();
-                const figuraSeleccionada = document.getElementById('player-symbol').value;
-                
-                if (resultado.estado === "ganador") {
-                    
-                    if (resultado.fichaGanadora === figuraSeleccionada) {
-                        setTimeout(() => {
-                            alert("¡Ganador: Jugador 1!");
-                            juego.reiniciarTablero(); 
-                        }, 50);
-                    } else {
-                        setTimeout(() => {
-                            alert("¡Ganador: Jugador 2!");
-                            juego.reiniciarTablero(); 
-                        }, 50);
-                    }
-                } else if (resultado.estado === "empate") {
-                    setTimeout(() => {
-                        alert("¡Empate!");
-                        juego.reiniciarTablero(); 
-                    }, 50);
-                }
+                const resultado = checkWinStateAndToggle();
 
-                if (resultado.estado !== "ganador") {
-                    turnoJugador = !turnoJugador;
+                // Si el juego continuó y estamos en modo Jugador vs PC (PVE) y es el turno del AI (false)
+                if (resultado.estado !== "ganador" && resultado.estado !== "empate" && config.mode === 'pve' && !turnoJugador) {
+                    jugarTurnoIA(); // Mandamos a llamar a la Inteligencia Artificial para que ejecute su acción
                 }
             }
         }
