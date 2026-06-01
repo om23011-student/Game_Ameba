@@ -126,7 +126,6 @@ export default class Ameba {
                         return {
                             estado: "ganador",
                             ganador: valor,
-                            fichaGanadora: valor ? "0" : "X", // <-- NUEVO: Retorna "0" o "X"
                             filaInicio: i,
                             columnaInicio: j,
                             direccion: [dx, dy]

@@ -71,10 +71,17 @@ function iniciarJuegoWebGL(config) {
     // Agregamos una función auxiliar para verificar ganador y cambiar turno
     const checkWinStateAndToggle = () => {
         const resultado = juego.verificarGanador();
-        const figuraSeleccionada = document.getElementById('player-symbol') ? document.getElementById('player-symbol').value : null;
+
+        // Extraemos la información del HTML para cotejarla como solicitaste
+        const comboBox = document.getElementById('player-symbol');
+        const simboloJ1DOM = comboBox ? comboBox.value : config.symbol;
 
         if (resultado.estado === "ganador") {
-            if (figuraSeleccionada && resultado.fichaGanadora === figuraSeleccionada) {
+            // Internamente 'true' siempre representa los movimientos del Jugador 1 y 'false' del Jugador 2/Motor
+            // Cotejamos esto con su respectivo símbolo
+            const esGanadorJugador1 = (resultado.ganador === true);
+
+            if (esGanadorJugador1) {
                 setTimeout(() => {
                     gestorInterfaz.mostrarMensaje("¡Ganador: Jugador 1!");
                     if (config.mode !== 'eve') {
