@@ -171,3 +171,57 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* ==================== 7. PANTALLA DE RESULTADO ==================== */
+        /* Contenedor que cubre toda la pantalla y centra el recuadro */
+        .pantalla-resultado {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(11, 12, 16, 0.85); /* Fondo oscuro translúcido */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Por encima del canvas y cualquier otro elemento */
+            transition: all 0.3s ease;
+        }
+
+        /* Regla estricta para ocultarlo cuando tenga la clase 'oculto' */
+        .pantalla-resultado.oculto {
+            display: none !important;
+        }
+
+        /* El recuadro con el mensaje de Fin de Juego */
+        .resultado-contenido {
+            background: rgba(22, 33, 62, 0.95);
+            padding: 30px;
+            border-radius: 8px;
+            width: 340px;
+            border: 2px solid #ff0055; /* Bordes magenta neón para dramatismo */
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.6);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Estilo para el texto del ganador */
+        #lblResultado {
+            font-size: 22px;
+            color: #00e5ff;
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+            font-weight: bold;
+        }
+
+        /* Ajuste específico para el botón de reiniciar dentro del modal */
+        #btnReiniciar {
+            border-color: #00e5ff;
+            color: #00e5ff;
+        }
+        #btnReiniciar:hover {
+            background-color: #00e5ff;
+            color: #0b0c10;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.8);
+        }

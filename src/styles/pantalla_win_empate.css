@@ -1,0 +1,93 @@
+/* 1. Oculto por defecto (Usamos !important para que gane a cualquier 'display: flex') */
+.oculto {
+    display: none !important;
+}
+
+/* 2. Fondo oscuro transparente y CENTRADO ABSOLUTO */
+.pantalla-resultado {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.75);
+
+    /* Flexbox se encarga de centrar el contenido perfectamente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Un z-index alto garantiza que se pinte por encima del canvas */
+    z-index: 9999;
+}
+
+/* Ventana emergente */
+.resultado-contenido {
+    background: #ffffff;
+
+    min-width: 350px;
+    max-width: 500px;
+
+    padding: 30px;
+    border-radius: 15px;
+
+    text-align: center;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+    animation: aparecer 0.25s ease-out;
+}
+
+/* Título */
+.resultado-contenido h2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Mensaje ganador */
+#lblResultado {
+    display: block;
+
+    font-size: 1.4rem;
+    font-weight: bold;
+
+    color: #1f2937;
+
+    margin-bottom: 25px;
+}
+
+/* Botón */
+#btnReiniciar {
+    padding: 12px 24px;
+
+    border: none;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 1rem;
+    font-weight: bold;
+
+    background-color: #2563eb;
+    color: white;
+
+    transition: 0.2s;
+}
+
+#btnReiniciar:hover {
+    transform: scale(1.05);
+}
+
+/* Animación */
+@keyframes aparecer {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

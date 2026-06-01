@@ -49,6 +49,7 @@ function iniciarJuegoWebGL(config) {
     const yMin = gridBuilder.yMin;
     const yMax = gridBuilder.yMax;
 
+    
     // === MATRIZ PARA CONTROLAR LA ANIMACIÓN DE CADA FICHA ===
     const reiniciarAlphas = () => {
         return Array(config.rows).fill().map(() => Array(config.cols).fill(0.0));
@@ -79,53 +80,68 @@ function iniciarJuegoWebGL(config) {
     const checkWinStateAndToggle = () => {
         const resultado = juego.verificarGanador();
 
+        // Elementos del DOM corregidos según tu HTML
+        const pantallaResultado = document.getElementById('pantallaResultado');
+        const lblResultado = document.getElementById('lblResultado');
+
         // Extraemos la información del HTML para cotejarla como solicitaste
         const comboBox = document.getElementById('player-symbol');
         const simboloJ1DOM = comboBox ? comboBox.value : config.symbol;
 
         if (resultado.estado === "ganador") {
-            // Internamente 'true' siempre representa los movimientos del Jugador 1 y 'false' del Jugador 2/Motor
-            // Cotejamos esto con su respectivo símbolo
+            // Internamente 'true' representa los movimientos del Jugador 1
             const esGanadorJugador1 = (resultado.ganador === true);
 
-            if (esGanadorJugador1) {
-                setTimeout(() => {
-                    gestorInterfaz.mostrarMensaje("¡Ganador: Jugador 1!");
-                    if (config.mode !== 'eve') {
-                        juego.reiniciarTablero();
-                        alphaFichas = reiniciarAlphas(); // Reiniciamos animaciones
-                        turnoJugador = true;
-                        gestorInterfaz.actualizarTurno(turnoJugador);
-                    }
-                }, 50);
-            } else {
-                setTimeout(() => {
-                    gestorInterfaz.mostrarMensaje(`¡Ganador: Jugador 2${config.mode !== 'pvp' ? ' (Motor)' : ''}!`);
-                    if (config.mode !== 'eve') {
-                        juego.reiniciarTablero();
-                        alphaFichas = reiniciarAlphas(); // Reiniciamos animaciones
-                        turnoJugador = true;
-                        gestorInterfaz.actualizarTurno(turnoJugador);
-                    }
-                }, 50);
-            }
-        } else if (resultado.estado === "empate") {
             setTimeout(() => {
-                gestorInterfaz.mostrarMensaje("¡Empate!");
+                // 1. Inyectamos el texto correspondiente en el label
+                if (esGanadorJugador1) {
+                    lblResultado.textContent = "¡Ganador: Jugador 1!";
+                } else {
+                    lblResultado.textContent = `¡Ganador: Jugador 2${config.mode !== 'pvp' ? ' (Motor)' : ''}!`;
+                }
+
+                // 2. Volvemos activo el mensaje quitando la clase 'oculto'
+                pantallaResultado.classList.remove('oculto');
+
+                // Reinicios de lógica interna (solo si no es EvE)
                 if (config.mode !== 'eve') {
                     juego.reiniciarTablero();
-                    alphaFichas = reiniciarAlphas(); // Reiniciamos animaciones
+                    alphaFichas = reiniciarAlphas(); 
                     turnoJugador = true;
                     gestorInterfaz.actualizarTurno(turnoJugador);
                 }
             }, 50);
+
+        } else if (resultado.estado === "empate") {
+            setTimeout(() => {
+                // 1. Inyectamos el texto de empate
+                lblResultado.textContent = "¡Empate!";
+
+                // 2. Mostramos la pantalla quitando 'oculto'
+                pantallaResultado.classList.remove('oculto');
+
+                if (config.mode !== 'eve') {
+                    juego.reiniciarTablero();
+                    alphaFichas = reiniciarAlphas(); 
+                    turnoJugador = true;
+                    gestorInterfaz.actualizarTurno(turnoJugador);
+                }
+            }, 50);
+
         } else {
+            // Si no hay fin de juego, cambiamos de turno normalmente
             turnoJugador = !turnoJugador;
             gestorInterfaz.actualizarTurno(turnoJugador);
         }
 
         return resultado;
     };
+
+
+    document.getElementById('btnReiniciar').addEventListener('click', () => {
+        document.getElementById('pantallaResultado').classList.add('oculto');
+        // Aquí puedes añadir lógica extra si necesitas limpiar el canvas antes de la próxima ronda
+    });
     // Función para que la IA (Motor) haga su jugada automáticamente
     const jugarTurnoIA = () => {
         // C) Invocamos nuestra función para obtener el rango de tiempo (humanizado o de exhibición)
