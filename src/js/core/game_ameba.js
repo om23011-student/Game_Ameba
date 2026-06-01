@@ -14,6 +14,7 @@ window.addEventListener('startGame', (e) => {
     console.log("¡Dándole fuego al motor WebGL con esta config!:", config);
     iniciarJuegoWebGL(config);
 });
+
 function iniciarJuegoWebGL(config) {
     // 1. Agarramos el canvas del DOM y le sacamos los poderes de WebGL
     const canvas = document.getElementById('miCanvas');
@@ -47,6 +48,12 @@ function iniciarJuegoWebGL(config) {
     const xMax = gridBuilder.xMax;
     const yMin = gridBuilder.yMin;
     const yMax = gridBuilder.yMax;
+
+    // === MATRIZ PARA CONTROLAR LA ANIMACIÓN DE CADA FICHA ===
+    const reiniciarAlphas = () => {
+        return Array(config.rows).fill().map(() => Array(config.cols).fill(0.0));
+    };
+    let alphaFichas = reiniciarAlphas(); // Inician todas invisibles (0.0)
 
     // =====================================================================
     // NUEVO: Instanciamos el manejador de inputs (Mapeo WebGL -> Cuadrícula)
@@ -86,6 +93,7 @@ function iniciarJuegoWebGL(config) {
                     gestorInterfaz.mostrarMensaje("¡Ganador: Jugador 1!");
                     if (config.mode !== 'eve') {
                         juego.reiniciarTablero();
+                        alphaFichas = reiniciarAlphas(); // Reiniciamos animaciones
                         turnoJugador = true;
                         gestorInterfaz.actualizarTurno(turnoJugador);
                     }
@@ -95,6 +103,7 @@ function iniciarJuegoWebGL(config) {
                     gestorInterfaz.mostrarMensaje(`¡Ganador: Jugador 2${config.mode !== 'pvp' ? ' (Motor)' : ''}!`);
                     if (config.mode !== 'eve') {
                         juego.reiniciarTablero();
+                        alphaFichas = reiniciarAlphas(); // Reiniciamos animaciones
                         turnoJugador = true;
                         gestorInterfaz.actualizarTurno(turnoJugador);
                     }
@@ -105,6 +114,7 @@ function iniciarJuegoWebGL(config) {
                 gestorInterfaz.mostrarMensaje("¡Empate!");
                 if (config.mode !== 'eve') {
                     juego.reiniciarTablero();
+                    alphaFichas = reiniciarAlphas(); // Reiniciamos animaciones
                     turnoJugador = true;
                     gestorInterfaz.actualizarTurno(turnoJugador);
                 }
@@ -180,6 +190,7 @@ function iniciarJuegoWebGL(config) {
     const btnRestart = document.getElementById('btn-restart');
     btnRestart.addEventListener('click', () => {
         juego.reiniciarTablero(); 
+        alphaFichas = reiniciarAlphas(); // Reiniciamos animaciones al limpiar el tablero
         turnoJugador = true; 
         gestorInterfaz.actualizarTurno(turnoJugador);
         cellHoverInfo.col = -1;
@@ -203,18 +214,28 @@ function iniciarJuegoWebGL(config) {
                     cx1, cy1, 0,  cx2, cy1, 0,  cx1, cy2, 0,
                     cx1, cy2, 0,  cx2, cy1, 0,  cx2, cy2, 0
                 ];
+                
+                // ENCENDEMOS BLENDING PARA HOVER (Sándwich)
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                
                 // Color según el turno
                 if (turnoJugador) {
                     renderer.setColor(0.0, 1.0, 0.0, 0.3); // Verde - Jugador 1
                 } else {
                     renderer.setColor(0.0, 0.0, 1.0, 0.3); // Azul - Jugador 2
                 }
+                
                 renderer.dibujar(puntosHover, true, gl.TRIANGLES);
+                
+                // APAGAMOS BLENDING
+                gl.disable(gl.BLEND);
             }
         }
         // 4.2 Dibujamos la cuadrícula oficial
         renderer.setColor(0.8, 0.8, 0.8, 1.0); // Retomamos gris claro para grid
         renderer.dibujar(puntosDelGrid, false, gl.POINTS);
+        
         // =====================================================================
         // 4.3 DIBUJAMOS LAS PIEZAS X y O EN EL TABLERO
         // =====================================================================
@@ -233,34 +254,42 @@ function iniciarJuegoWebGL(config) {
 
                     let puntosFigura = []; 
 
+                    // LÓGICA DE ANIMACIÓN FADE-IN
+                    if (alphaFichas[r][c] < 1.0) {
+                        alphaFichas[r][c] += 0.05; // Ajusta este valor para hacer la aparición más rápida o lenta
+                        if (alphaFichas[r][c] > 1.0) alphaFichas[r][c] = 1.0; 
+                    }
+                    const alfaActual = alphaFichas[r][c];
+
                     // 3. Verificamos qué figura dibujar de acuerdo al input del usuario (config.symbol)
                     const esJugador1 = (ficha === true);
                     const dibujaEquis = (config.symbol === 'X' && esJugador1) || (config.symbol === '0' && !esJugador1);
 
+                    // ENCENDEMOS BLENDING PARA FICHAS (Sándwich)
+                    gl.enable(gl.BLEND);
+                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+                    // Asignamos el color con la opacidad calculada
+                    if (esJugador1) renderer.setColor(0.0, 1.0, 0.0, alfaActual); 
+                    else renderer.setColor(0.0, 0.0, 1.0, alfaActual);
+
                     if (!dibujaEquis) {
                         // === DIBUJAR CERO ===
-                        // Jugador 1 es verde y 2 es azul para diferenciar, aunque combinen la figura
-                        if (esJugador1) renderer.setColor(0.0, 1.0, 0.0, 1.0); 
-                        else renderer.setColor(0.0, 0.0, 1.0, 1.0);
-                        
-                        const dibujarElipse = generadorElipses.calcularElipse(cx, cy, sizeX, sizeY, 50);
-                        renderer.dibujar(dibujarElipse, false);
-
+                        puntosFigura = generadorElipses.calcularElipse(cx, cy, sizeX, sizeY, 50);
                     } else {
                         // === DIBUJAR EQUIS ===
-                        if (esJugador1) renderer.setColor(0.0, 1.0, 0.0, 1.0); 
-                        else renderer.setColor(0.0, 0.0, 1.0, 1.0);
-                        
                         const linea1 = generadorLineasBresenham.calcularBresenham(cx - sizeX, cy + sizeY, cx + sizeX, cy - sizeY);
                         const linea2 = generadorLineasBresenham.calcularBresenham(cx - sizeX, cy - sizeY, cx + sizeX, cy + sizeY);
                         puntosFigura = [...linea1, ...linea2];
-                        renderer.dibujar(puntosFigura, false);
                     }
 
-                    // 4. Mandamos a dibujar la figura que hayamos cargado
+                    // 4. Mandamos a dibujar LA ÚNICA VEZ
                     if (puntosFigura.length > 0) {
                         renderer.dibujar(puntosFigura, false, gl.POINTS);
                     }
+
+                    // APAGAMOS BLENDING
+                    gl.disable(gl.BLEND);
                 }
             }
         }
