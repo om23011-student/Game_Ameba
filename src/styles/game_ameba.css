@@ -1,0 +1,173 @@
+/* ==========================================================================
+ * HOJA DE ESTILOS: game_ameba.css
+ * ==========================================================================
+ * Contiene todo el diseño gráfico responsivo, estética de color (tema "cyberpunk")
+ * y las animaciones de las interfaces HTML. Se encuentra purgado
+ * y separado de main.html para mantener un código limpio (Buenas Prácticas).
+ * ========================================================================== */
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #0b0c10; /* Fondo inmersivo */
+            background-image: radial-gradient(circle at center, #1a1a2e 0%, #0b0c10 100%);
+            color: #ecf0f1;
+            font-family: 'Rajdhani', Arial, sans-serif;
+            flex-direction: column;
+        }
+
+        h1, h2 {
+            color: #00e5ff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ==================== 1. MANEJO DE VISTAS ==================== */
+        /* Pantallas - Se maneja la visibilidad con 'active' */
+        #loading-screen, #menu-screen, #game-screen {
+            display: none;
+            text-align: center;
+            flex-direction: column;
+            align-items: center;
+        }
+        #loading-screen.active, #menu-screen.active, #game-screen.active {
+            display: flex;
+        }
+
+        /* ==================== 2. DISEÑO DEL FORMULARIO ==================== */
+        /* Estilos del menú */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+            background: rgba(22, 33, 62, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            width: 320px;
+            border: 2px solid #0f3460;
+            box-shadow: 0 4px 15px rgba(15, 52, 96, 0.5);
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #e94560;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            background-color: #1a1a2e;
+            color: #00e5ff;
+            border: 1px solid #00e5ff;
+            border-radius: 4px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            outline: none;
+            transition: box-shadow 0.3s;
+        }
+        select:focus, input:focus {
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        /* ==================== 3. BOTONERA ==================== */
+        /* Botones principales */
+        button {
+            padding: 15px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: transparent;
+            color: #00e5ff;
+            border: 2px solid #00e5ff;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: bold;
+            width: 100%;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: 'Rajdhani', sans-serif;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2) inset;
+        }
+        button:hover {
+            background-color: #00e5ff;
+            color: #0b0c10;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+        }
+        #btn-restart {
+            border-color: #ff0055;
+            color: #ff0055;
+            margin-top: 15px;
+            width: auto;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.2) inset;
+        }
+        #btn-restart:hover {
+            background-color: #ff0055;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
+        }
+
+        /* ==================== 4. WEBGL CANVAS ==================== */
+        /* Canvas del juego */
+        canvas {
+            background-color: #0a0e17;
+            border: 2px solid #e94560;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            border-radius: 4px;
+        }
+
+        /* ==================== 5. TABLERO DE TURNOS ==================== */
+        /* Contenedor principal de los nombres de jugadores */
+        .turn-board {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .turn-box {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid #555;
+            border-radius: 5px;
+            font-size: 20px;
+            color: #555;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        .turn-active-p1 {
+            border-color: #00e5ff;
+            color: #00e5ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+            background: rgba(0, 229, 255, 0.1);
+        }
+        .turn-active-p2 {
+            border-color: #e94560;
+            color: #e94560;
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.6);
+            background: rgba(233, 69, 96, 0.1);
+        }
+
+        /* ==================== 6. ANIMACIONES ==================== */
+        /* Animación para el loader circular */
+        .loader {
+            border: 6px solid #1a1a2e;
+            border-top: 6px solid #00e5ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }

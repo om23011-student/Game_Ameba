@@ -4,110 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ameba - Juego Equis Cero</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #2c3e50; /* Fondo oscuro */
-            color: #ecf0f1;
-            font-family: Arial, sans-serif;
-            flex-direction: column;
-        }
-
-        /* Pantallas - Se maneja la visibilidad con 'active' */
-        #loading-screen, #menu-screen, #game-screen {
-            display: none;
-            text-align: center;
-            flex-direction: column;
-            align-items: center;
-        }
-        #loading-screen.active, #menu-screen.active, #game-screen.active {
-            display: flex;
-        }
-
-        /* Estilos del menú */
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-            background: #34495e;
-            padding: 15px;
-            border-radius: 8px;
-            width: 320px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        select, input {
-            width: 100%;
-            padding: 5px;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
-
-        /* Botones */
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background 0.2s;
-            font-weight: bold;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #2ecc71;
-        }
-        #btn-restart {
-            background-color: #e74c3c;
-            margin-top: 15px;
-            width: auto;
-        }
-        #btn-restart:hover {
-            background-color: #c0392b;
-        }
-
-        /* Canvas del juego */
-        canvas {
-            background-color: #000000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        }
-
-        /* Animación para el loader */
-        .loader {
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #27ae60;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/game_ameba.css">
 </head>
 <body>
-
 <!-- A) Pantalla de carga -->
 <div id="loading-screen" class="active">
     <div class="loader"></div>
     <h2>cargando experiencia personalizada xd</h2>
 </div>
-
 <!-- Menú Principal -->
 <div id="menu-screen">
     <h1>layout de menu</h1>
-
     <!-- B) Modo de juego -->
     <div class="form-group">
         <label>Modalidad de enfrentamiento:</label>
@@ -117,7 +25,6 @@
             <option value="eve">DEMO</option>
         </select>
     </div>
-
     <!-- C) Dimensiones del canvas / Tablero -->
     <div class="form-group">
         <label>Tamanio del grid (Mínimo 5x5):</label>
@@ -130,7 +37,6 @@
             </div>
         </div>
     </div>
-
     <!-- D) Selección de figura (Equis o Cero) -->
     <div class="form-group">
         <label>Jugador 1 elige figura:</label>
@@ -140,67 +46,26 @@
         </select>
         <small style="color:#bdc3c7; display:block; margin-top: 5px;">El Jugador 2 tendrá la figura opuesta.</small>
     </div>
-
     <!-- E) Botón de inicio -->
     <button id="btn-start">Iniciar Partida</button>
 </div>
-
 <!-- Pantalla de Juego interactiva -->
 <div id="game-screen">
     <h2 id="game-title">Amoeba Game</h2>
+
+    <!-- G) Tablero de turnos -->
+    <div id="turn-board" class="turn-board">
+        <div id="turn-p1" class="turn-box">Jugador 1</div>
+        <div id="turn-p2" class="turn-box">Jugador 2</div>
+    </div>
+
     <canvas id="miCanvas" width="800" height="800"></canvas>
     <button id="btn-restart">Volver al Menú</button>
 </div>
 
-<!-- Javascript Integrado para flujo básico de ventanas -->
-<script>
-    // A) Simulamos una pantallita de carga chida para darle estilo
-    setTimeout(() => {
-        // Quitamos el loader y mostramos el menú principal al usuario
-        document.getElementById('loading-screen').classList.remove('active');
-        document.getElementById('menu-screen').classList.add('active');
-    }, 1200);
-
-    // Captura todo el show cuando le dan al botón de start (E)
-    document.getElementById('btn-start').addEventListener('click', () => {
-        // Agarramos los valores que escogió el usuario
-        const mode = document.getElementById('game-mode').value;
-        const cols = parseInt(document.getElementById('grid-cols').value, 10);
-        const rows = parseInt(document.getElementById('grid-rows').value, 10);
-        const symbol = document.getElementById('player-symbol').value;
-
-        // Validación rigurosa para que no puedan saltarse el mínimo de 5x5
-        if (isNaN(cols) || isNaN(rows) || cols < 5 || rows < 5) {
-            alert("trnquilo mi pa, que hace, no vio que esa vaina es de 5x5 para arriba?");
-            // Restablecemos a 5 los valores en la vista
-            document.getElementById('grid-cols').value = Math.max(5, isNaN(cols) ? 5 : cols);
-            document.getElementById('grid-rows').value = Math.max(5, isNaN(rows) ? 5 : rows);
-            return; // Cortamos aquí para que no inicie el juego ROTO
-        }
-
-        // hide de el menu y mostramos solo el grid de la partida
-        document.getElementById('menu-screen').classList.remove('active');
-        document.getElementById('game-screen').classList.add('active');
-
-        // Titulo de a corde a las dimeciones de que seligiron
-        document.getElementById('game-title').textContent = `Partida Ameba: ${cols}x${rows}`;
-
-        //Le damos el pitazo al motor del juego con un CustomEvent, de pasada le aventamos la config entera
-        window.dispatchEvent(new CustomEvent('startGame', {
-            detail: { mode, cols: parseInt(cols), rows: parseInt(rows), symbol }
-        }));
-    });
-
-    // Boton de regreso al menu
-    document.getElementById('btn-restart').addEventListener('click', () => {
-        document.getElementById('game-screen').classList.remove('active');
-        document.getElementById('menu-screen').classList.add('active');
-        // Nota mental: luego aquí podemos avisarle a WebGL que limpie su desastre de la partida vieja
-    });
-</script>
-
+<!-- Lgica de interaccin de ventanas del men -->
+<script src="../js/complements/GestorVentanas.js"></script>
 <!-- Lógica WebGL del Juego -->
 <script type="module" src="../js/core/game_ameba.js"></script>
-
 </body>
 </html>

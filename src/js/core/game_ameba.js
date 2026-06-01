@@ -5,6 +5,9 @@ import DibujarArcos from '../complements/algoritmo_arcos.js';
 import AlgoritmoElipse from '../complements/algoritmo_elipse.js';
 import WinDetector from './WinDetector.js';
 import Motor from './Motor.js';
+import GestorInterfaz from '../complements/GestorInterfaz.js';
+import GestorEntradas from '../complements/GestorEntradas.js';
+
 // Nos quedamos esperando a que el HTML nos pegue el grito de "startGame" para arrancar
 window.addEventListener('startGame', (e) => {
     const config = e.detail;
@@ -44,77 +47,66 @@ function iniciarJuegoWebGL(config) {
     const xMax = gridBuilder.xMax;
     const yMin = gridBuilder.yMin;
     const yMax = gridBuilder.yMax;
+
     // =====================================================================
+    // NUEVO: Instanciamos el manejador de inputs (Mapeo WebGL -> Cuadrícula)
+    const gestorEntradas = new GestorEntradas(canvas, xMin, xMax, yMin, yMax, cellWidth, cellHeight, config.rows, config.cols);
+
     // Variables para el evento Hover
     let cellHoverInfo = { fila: -1, col: -1 };
+
     canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        // Coordenadas locales dentro del canvas
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        // Convertir de px a rango Normalizado (-1, 1) para cuadrar con WebGL
-        const normX = (mouseX / canvas.width) * 2 - 1;
-        const normY = (1 - (mouseY / canvas.height)) * 2 - 1; // Invertimos Y en WebGL
-        // Verificar si click está dentro de los márgenes del Grid (0.9 limit)
-        if(normX >= xMin && normX <= xMax && normY >= yMin && normY <= yMax) {
-            // X recorre las columnas de izq a der
-            const c = Math.floor((normX - xMin) / cellWidth);
-            // Y recorre las filas de arriba a abajo, normY decrece.
-            // Para indexarlo de top(0) a bottom(rows), hacemos:
-            const r = Math.floor((yMax - normY) / cellHeight);
-            // Asegurar que no nos pasemos de array (por ejemplo col=cols por culpa del borde exacto)
-            const finalCol = Math.min(c, config.cols - 1);
-            const finalFila = Math.min(r, config.rows - 1);
-            cellHoverInfo.col = finalCol;
-            cellHoverInfo.fila = finalFila;
-        } else {
-            // Fuera de limites
-            cellHoverInfo.col = -1;
-            cellHoverInfo.fila = -1;
-        }
+        cellHoverInfo = gestorEntradas.obtenerCelda(e.clientX, e.clientY);
     });
+
     let turnoJugador = true; // true = Jugador 1 (O), false = Jugador 2 (X)
-    // Agregamos una función auxiliar para mostrar mensajes (para no bloquear en modo DEMO)
-    const mostrarMensaje = (msg) => {
-        alert(msg);
-    };
+
+    // ===========================================
+    // NUEVO: Lógica del tablero UI de Turnos (ABSTRAÍDO)
+    // ===========================================
+    const gestorInterfaz = new GestorInterfaz();
+    gestorInterfaz.configurarNombres(config.mode);
+    gestorInterfaz.actualizarTurno(turnoJugador);
+
     // Agregamos una función auxiliar para verificar ganador y cambiar turno
     const checkWinStateAndToggle = () => {
         const resultado = juego.verificarGanador();
-        
+        const figuraSeleccionada = document.getElementById('player-symbol') ? document.getElementById('player-symbol').value : null;
+
         if (resultado.estado === "ganador") {
-            // El WinDetector determina quién gana devolviendo el mismo valor booleano con el que se colocó la ficha
-            // Como 'turnoJugador = true' siempre se asigna al Jugador 1, si 'resultado.ganador === true' ganó el 1
-            if (resultado.ganador === true) {
+            if (figuraSeleccionada && resultado.fichaGanadora === figuraSeleccionada) {
                 setTimeout(() => {
-                    mostrarMensaje("¡Ganador: Jugador 1!");
-                    
+                    gestorInterfaz.mostrarMensaje("¡Ganador: Jugador 1!");
                     if (config.mode !== 'eve') {
                         juego.reiniciarTablero();
                         turnoJugador = true;
+                        gestorInterfaz.actualizarTurno(turnoJugador);
                     }
                 }, 50);
             } else {
                 setTimeout(() => {
-                    mostrarMensaje(`¡Ganador: Jugador 2${config.mode !== 'pvp' ? ' (Motor)' : ''}!`);
-                    
+                    gestorInterfaz.mostrarMensaje(`¡Ganador: Jugador 2${config.mode !== 'pvp' ? ' (Motor)' : ''}!`);
                     if (config.mode !== 'eve') {
                         juego.reiniciarTablero();
                         turnoJugador = true;
+                        gestorInterfaz.actualizarTurno(turnoJugador);
                     }
                 }, 50);
             }
         } else if (resultado.estado === "empate") {
             setTimeout(() => {
-                mostrarMensaje("¡Empate!");
+                gestorInterfaz.mostrarMensaje("¡Empate!");
                 if (config.mode !== 'eve') {
                     juego.reiniciarTablero();
                     turnoJugador = true;
+                    gestorInterfaz.actualizarTurno(turnoJugador);
                 }
             }, 50);
         } else {
             turnoJugador = !turnoJugador;
+            gestorInterfaz.actualizarTurno(turnoJugador);
         }
+
         return resultado;
     };
     // Función para que la IA (Motor) haga su jugada automáticamente
@@ -182,9 +174,11 @@ function iniciarJuegoWebGL(config) {
     btnRestart.addEventListener('click', () => {
         juego.reiniciarTablero(); 
         turnoJugador = true; 
+        gestorInterfaz.actualizarTurno(turnoJugador);
         cellHoverInfo.col = -1;
         cellHoverInfo.fila = -1;
     }, { signal: signal }); 
+
     // 4. Ciclo de Animación / Redibujado
     function renderLoop() {
         renderer.limpiar();
