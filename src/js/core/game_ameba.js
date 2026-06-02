@@ -328,7 +328,7 @@ function iniciarJuegoWebGL(config) {
                     if (!dibujaEquis) {
                         // === DIBUJAR CERO ===
                         // Restamos 0.01 a sizeX para un ajuste visual fino.
-                        puntosFigura = generadorElipses.calcularElipse(cx, cy, sizeX - 0.01, sizeY);
+                        puntosFigura = generadorElipses.calcularCirculo(cx, cy, sizeX - 0.01);
                     } else {
                         // === DIBUJAR EQUIS ===
                         // Calculamos dos líneas diagonales usando Bresenham que se cruzan en (cx, cy).
