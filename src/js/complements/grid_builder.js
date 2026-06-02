@@ -2,7 +2,7 @@
 import LineaDDA from './algoritmo_dda.js'; 
 
 export default class GridBuilder {
-    constructor(xMin = -0.9, xMax = 0.9, yMin = -0.9, yMax = 0.9) {
+    constructor(xMin, xMax, yMin, yMax) {
         this.xMin = xMin;
         this.xMax = xMax;
         this.yMin = yMin;

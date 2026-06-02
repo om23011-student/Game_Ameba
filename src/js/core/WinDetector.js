@@ -161,35 +161,4 @@ export default class Ameba {
         console.log("¡El tablero ha sido reiniciado por completo!");
     }
 
-
-    // ========================================
-    // MOSTRAR TABLERO ( solo para verificar en consola )
-    // ========================================
-
-    mostrarTablero() {
-
-        console.log("\nTABLERO:\n");
-
-        for (let i = 0; i < this.filas; i++) {
-
-            let textoFila = "";
-
-            for (let j = 0; j < this.columnas; j++) {
-
-                const valor = this.tablero[i][j];
-
-                if (valor === true) {
-                    textoFila += " T ";
-                }
-                else if (valor === false) {
-                    textoFila += " F ";
-                }
-                else {
-                    textoFila += " . ";
-                }
-            }
-
-            console.log(textoFila);
-        }
-    }
 }

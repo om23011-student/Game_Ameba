@@ -20,10 +20,7 @@ function iniciarJuegoWebGL(config) {
     const canvas = document.getElementById('miCanvas');
     const gl = canvas.getContext('webgl');
     // Por si alguien entra desde una tostadora sin soporte gráfico
-    if (!gl) {
-        console.error("Uy, tu navegador no aguanta WebGL bro :(");
-        return;
-    }
+    
     // Instanciamos el modelo lógico de nuestro juego!
     const juego = new WinDetector();
     juego.iniciarJuego(config.rows || 5, config.cols || 5);
@@ -255,56 +252,104 @@ function iniciarJuegoWebGL(config) {
         // =====================================================================
         // 4.3 DIBUJAMOS LAS PIEZAS X y O EN EL TABLERO
         // =====================================================================
+        
         // Iteramos por todas las filas y columnas de nuestro tablero lógico
         for (let r = 0; r < config.rows; r++) {
             for (let c = 0; c < config.cols; c++) {
+                
                 const ficha = juego.tablero[r][c];
-                // Si la celda no está vacía, calculamos su centro y dibujamos
+                
+                // Solo procesamos y dibujamos si hay una ficha en esta celda
                 if (ficha !== null) {
-                    // 1. Calculamos el CENTRO EXACTO de la celda (cx, cy)
+                    
+                    // ---------------------------------------------------------
+                    // PASO 1: CÁLCULO DE POSICIÓN Y TAMAÑO
+                    // ---------------------------------------------------------
+                    // Calculamos las coordenadas del centro exacto de la celda actual.
+                    // Partimos del borde mínimo (xMin/yMax) y le sumamos el desplazamiento
+                    // de la celda más la mitad de su tamaño para quedar justo en el medio.
                     const cx = xMin + (c * cellWidth) + (cellWidth / 2);
                     const cy = yMax - (r * cellHeight) - (cellHeight / 2);
-                    // 2. Definimos un tamaño para la figura
+                    
+                    // Definimos el tamaño (radio) de la figura.
+                    // Usamos el 35% del tamaño de la celda para dejar un margen visual
+                    // y que las figuras no choquen con las líneas del grid.
                     const sizeX = cellWidth * 0.35; 
                     const sizeY = cellHeight * 0.35;
 
                     let puntosFigura = []; 
 
-                    // LÓGICA DE ANIMACIÓN FADE-IN
+                    // ---------------------------------------------------------
+                    // PASO 2: LÓGICA DE ANIMACIÓN (FADE-IN POR FRAME)
+                    // ---------------------------------------------------------
+                    // Aumentamos gradualmente la opacidad (alpha) en cada frame.
+                    // Si sumamos 0.05 por frame, la ficha tardará 20 frames en 
+                    // llegar a 1.0 (opacidad total).
                     if (alphaFichas[r][c] < 1.0) {
-                        alphaFichas[r][c] += 0.05; // Ajusta este valor para hacer la aparición más rápida o lenta
+                        alphaFichas[r][c] += 0.05; 
+                        
+                        // Tope de seguridad: evitamos que el alpha supere el 100%
                         if (alphaFichas[r][c] > 1.0) alphaFichas[r][c] = 1.0; 
                     }
                     const alfaActual = alphaFichas[r][c];
 
-                    // 3. Verificamos qué figura dibujar de acuerdo al input del usuario (config.symbol)
+                    // ---------------------------------------------------------
+                    // PASO 3: DETERMINAR QUÉ Y CÓMO DIBUJAR
+                    // ---------------------------------------------------------
+                    // Determinamos si la ficha pertenece al Jugador 1 o 2
                     const esJugador1 = (ficha === true);
-                    const dibujaEquis = (config.symbol === 'X' && esJugador1) || (config.symbol === '0' && !esJugador1);
+                    
+                    // Lógica cruzada: Evaluamos si el símbolo configurado por el
+                    // usuario hace "match" con el turno correspondiente para saber
+                    // si toca dibujar la Equis o el Cero.
+                    const dibujaEquis = (config.symbol === 'X' && esJugador1) || 
+                                        (config.symbol === '0' && !esJugador1);
 
-                    // ENCENDEMOS BLENDING PARA FICHAS (Sándwich)
+                    // ---------------------------------------------------------
+                    // PASO 4: CONFIGURACIÓN WEBGL PARA TRANSPARENCIAS
+                    // ---------------------------------------------------------
+                    // Activamos el "Blending" (Mezcla de colores) en WebGL.
+                    // Esto permite que el canal Alpha funcione mezclando el color 
+                    // de la ficha con el color del fondo en lugar de sobrescribirlo.
                     gl.enable(gl.BLEND);
                     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-                    // Asignamos el color con la opacidad calculada
-                    if (esJugador1) renderer.setColor(0.0, 1.0, 0.0, alfaActual); 
-                    else renderer.setColor(0.0, 0.0, 1.0, alfaActual);
+                    // Asignamos el color dependiendo del jugador.
+                    // El último parámetro es nuestra variable de animación 'alfaActual'.
+                    if (esJugador1) {
+                        renderer.setColor(0.0, 1.0, 0.0, alfaActual); // Verde
+                    } else {
+                        renderer.setColor(0.0, 0.0, 1.0, alfaActual); // Azul
+                    }
 
+                    // ---------------------------------------------------------
+                    // PASO 5: GENERACIÓN DE GEOMETRÍA
+                    // ---------------------------------------------------------
                     if (!dibujaEquis) {
                         // === DIBUJAR CERO ===
-                        puntosFigura = generadorElipses.calcularElipse(cx, cy, sizeX, sizeY, 50);
+                        // Restamos 0.01 a sizeX para un ajuste visual fino.
+                        puntosFigura = generadorElipses.calcularElipse(cx, cy, sizeX - 0.01, sizeY);
                     } else {
                         // === DIBUJAR EQUIS ===
+                        // Calculamos dos líneas diagonales usando Bresenham que se cruzan en (cx, cy).
                         const linea1 = generadorLineasBresenham.calcularBresenham(cx - sizeX, cy + sizeY, cx + sizeX, cy - sizeY);
                         const linea2 = generadorLineasBresenham.calcularBresenham(cx - sizeX, cy - sizeY, cx + sizeX, cy + sizeY);
+                        
+                        // Combinamos los puntos de ambas líneas en un solo arreglo.
                         puntosFigura = [...linea1, ...linea2];
                     }
 
-                    // 4. Mandamos a dibujar LA ÚNICA VEZ
+                    // ---------------------------------------------------------
+                    // PASO 6: RENDERIZADO Y LIMPIEZA
+                    // ---------------------------------------------------------
+                    // Enviamos los puntos a la tarjeta gráfica (una sola llamada drawArrays).
                     if (puntosFigura.length > 0) {
                         renderer.dibujar(puntosFigura, false, gl.POINTS);
                     }
 
-                    // APAGAMOS BLENDING
+                    // Apagamos el blending de inmediato (Técnica de sándwich).
+                    // Esto evita que otras partes del juego (como el grid normal) 
+                    // se rendericen con blending si no lo necesitan, ahorrando rendimiento.
                     gl.disable(gl.BLEND);
                 }
             }

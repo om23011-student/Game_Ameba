@@ -49,11 +49,4 @@ export default class GestorInterfaz {
         }
     }
 
-    /**
-     * Centraliza la muestra de mensajes en pantalla (alertas de victoria o empate).
-     * @param {string} mensaje - El texto que se va a mostrar al usuario.
-     */
-    mostrarMensaje(mensaje) {
-        
-    }
 }
