@@ -69,7 +69,7 @@ export default class AlgoritmoElipse {
         return puntos;
     }
 
-    // --- NUEVO: Algoritmo de Bresenham (Punto Medio) para el Círculo ---
+    
     calcularCirculo(xc, yc, r, octants = [0, 1, 2, 3, 4, 5, 6, 7], resolucion = 100) {
         const puntos = [];
 

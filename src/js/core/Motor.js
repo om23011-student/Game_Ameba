@@ -156,7 +156,7 @@ export default class Motor {
     obtenerTiempoPensamiento(modo) {
         if (modo === 'eve') {
             // En MaquinavsMaquina es ligeramente más rápido (300 a 800 ms) para que el espectáculo sea fluido
-            return Math.floor(Math.random() * 500) + 300;
+            return Math.floor(Math.random() * 1000) + 600;
         }
 
         // En 1vsMaquina aplicamos un retraso más humano (entre 600 y 1600 milisegundos)
